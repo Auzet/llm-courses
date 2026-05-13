@@ -11,3 +11,12 @@ export const StudyPlanSchema = z.object({
     })
   )
 });
+
+export type StudyPlan = z.infer<typeof StudyPlanSchema>;
+
+export type Phase = {
+  phase_number: number;
+  title: string;
+  focus: string;
+  steps: string[];
+};
