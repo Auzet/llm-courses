@@ -11,7 +11,6 @@ export async function loadDocument(file: File): Promise<string[]> {
     const tmpPath = join(tmpdir(), `${randomUUID()}-${file.name}`);
 
     try {
-        // Сохраняем во временную папку (требуют все FS-лоадеры)
         await writeFile(tmpPath, Buffer.from(await file.arrayBuffer()));
 
         let loader;

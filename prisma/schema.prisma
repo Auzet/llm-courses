@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document    Document?    // 1 курс = 1 основной документ (можно расширить до 1:N позже)
+  plan        StudyPlan?   // 1 курс = 1 активный план
+  questions   Question[]
+
+  @@map("courses")
+}
+
+// 🔹 Загруженный документ
+model Document {
+  id         String   @id @default(cuid())
+  courseId   String   @unique // Связь 1:1 с курсом
+  fileName   String
+  sourceId   String   @unique // ID коллекции/фильтра в ChromaDB
+  status     String   @default("processing") // processing | ready | failed
+  chunksCount Int     @default(0)
+  uploadedAt DateTime @default(now())
+
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+// 🔹 Учебный план (хранится как структурированный JSON)
+model StudyPlan {
+  id        String   @id @default(cuid())
+  courseId  String   @unique
+  title     String
+  content   Json     // { title, total_duration_weeks, phases: [{ phase_number, title, focus, steps, estimated_hours }], final_project, tips }
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("study_plans")
+}
+
+// 🔹 Типы вопросов
+enum QuestionType {
+  MULTIPLE_CHOICE
+  OPEN_ENDED
+}
+
+// 🔹 Вопросы/Тесты
+model Question {
+  id            String       @id @default(cuid())
+  courseId      String
+  phaseNumber   Int          // Привязка к этапу плана (соответствует phase_number в StudyPlan.content)
+  type          QuestionType // MULTIPLE_CHOICE | OPEN_ENDED
+  category      String?      // "theory", "practice", "debug", "concepts"
+  questionText  String       @db.Text
+  options       Json?        // ["Вариант A", "Вариант B", "Вариант C", "Вариант D"] (только для MC)
+  correctAnswer String       @db.Text // Для MC: точный текст правильного варианта. Для Open: эталонный ответ/ключевые тезисы
+  explanation   String?      @db.Text
+  createdAt     DateTime     @default(now())
+
+  course        Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, phaseNumber]) // Быстрый поиск вопросов по этапу
+  @@map("questions")
+}

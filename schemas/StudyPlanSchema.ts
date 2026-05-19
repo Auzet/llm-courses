@@ -20,3 +20,22 @@ export type Phase = {
   focus: string;
   steps: string[];
 };
+
+export type TestQuestion = {
+  id: number;
+  question: string;
+  options: [string, string, string, string]; // кортеж из 4 строк
+  correct_answer: string;
+  explanation: string;
+};
+
+export type StudyTest = {
+  phase_title: string;
+  questions: TestQuestion[];
+};
+
+type StudyTestViewerProps = {
+  test: StudyTest;
+  onChange: (test: StudyTest) => void;
+  phaseNumber?: number;
+};

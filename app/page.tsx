@@ -1,16 +1,24 @@
 "use client";
+import { CreateCourseBtn } from "@/components/CreateCourseBtn";
+import NavMenu from "@/components/NavMenu";
+import { TestDialog } from "@/components/testbtn";
 import { Button } from "@/components/ui/button";
+import { Select } from "radix-ui";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuShortcut, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuPortal, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { StudyPlan } from "@/schemas/StudyPlanSchema";
-import { Pencil } from "lucide-react";
+import { StudyPlan, TestQuestion } from "@/schemas/StudyPlanSchema";
+import { CheckCircle, Lightbulb, Pencil, Save, X } from "lucide-react";
 import { useState } from "react";
 
 export default function StudyPlanGenerator() {
@@ -20,6 +28,7 @@ export default function StudyPlanGenerator() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState<TestQuestion | null>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +60,22 @@ export default function StudyPlanGenerator() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-muted">
+    <main className="flex min-h-screen p-8 bg-muted">
+      <NavMenu />
       <div className="max-w-2xl mx-auto p-6 rounded-xl shadow bg-card font-sans">
         <h1 className="text-2xl text-primary font-bold mb-4">Шаг 1:</h1>
 
+            <CreateCourseBtn />
+           <select name="pets" id="pet-select">
+  <option value="">--Please choose an option--</option>
+  <option value="dog">Dog</option>
+  <option value="cat">Cat</option>
+  <option value="hamster">Hamster</option>
+  <option value="parrot">Parrot</option>
+  <option value="spider">Spider</option>
+  <option value="goldfish">Goldfish</option>
+</select>
+      
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
@@ -125,14 +146,13 @@ export default function StudyPlanGenerator() {
                       </CardTitle>
                       <Button
                         size="icon"
-                        variant={isEditing ?  "destructive" : "secondary" }
+                        variant={isEditing ? "destructive" : "secondary"}
                         className="h-8 w-8 text-muted-foreground hover:text-primary"
                         onClick={() => setIsEditing(true)}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
                     </div>
-
                     <CardDescription>
                       <p className="text-sm">{phase.focus}</p>
                     </CardDescription>
@@ -151,16 +171,17 @@ export default function StudyPlanGenerator() {
                   </CardContent>
                 </Card>
                 {isEditing && (
-                    <Textarea
-                      className="w-full min-h-24 p-3 mt-3"
-                      placeholder="Например: Измени пункт 1 так, чтобы..."
-                    ></Textarea>
+                  <Textarea
+                    className="w-full min-h-24 p-3 mt-3"
+                    placeholder="Например: Измени пункт 1 так, чтобы..."
+                  ></Textarea>
                 )}
               </div>
             ))}
           </div>
         )}
       </div>
+      
     </main>
   );
 }
